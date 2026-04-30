@@ -158,6 +158,10 @@
     .screen { display: none; flex: 1; flex-direction: column; }
     .screen.active { display: flex; animation: slide-up .25s ease-out; }
 
+    /* Home screen: even gap between cards, button sits at the bottom with the same gap */
+    #screen-home.active { gap: 12px; }
+    #screen-home .footer { margin-top: 0; }
+
     /* ---------- HOME ---------- */
     .topbar {
       display: flex;
@@ -260,7 +264,6 @@
       border: 1px solid var(--border);
       border-radius: 14px;
       padding: 14px;
-      margin-top: 14px;
     }
     .boxes-title {
       font-size: 12px; color: var(--muted);
@@ -298,7 +301,6 @@
 
     .start-btn {
       margin-top: auto;
-      margin-bottom: 0;
       background: var(--teal);
       color: white;
       border: none;
@@ -324,7 +326,6 @@
     }
 
     .welcome-card {
-      margin-top: 14px;
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: 14px;
@@ -374,7 +375,6 @@
     }
 
     .heat-card {
-      margin-top: 14px;
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: 14px;
