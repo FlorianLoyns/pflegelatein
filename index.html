@@ -805,6 +805,59 @@
       text-decoration: none;
     }
     .sheet-link-row a:hover { text-decoration: underline; }
+
+    /* ---------- TTS Speaker button on cards ---------- */
+    .speaker-btn {
+      position: absolute; bottom: 16px; right: 16px;
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      display: grid; place-items: center;
+      color: var(--teal);
+      cursor: pointer;
+      z-index: 3;
+      transition: transform .15s, background .15s;
+    }
+    .speaker-btn:active { transform: scale(.9); }
+    .speaker-btn.playing {
+      background: var(--teal);
+      color: white;
+      border-color: transparent;
+      animation: speaker-pulse 0.6s ease-out;
+    }
+    @keyframes speaker-pulse {
+      0%   { box-shadow: 0 0 0 0 rgba(13, 115, 119, .55); }
+      100% { box-shadow: 0 0 0 16px rgba(13, 115, 119, 0); }
+    }
+
+    /* ---------- Combo pill (during session) ---------- */
+    .combo-pill {
+      position: fixed; top: max(env(safe-area-inset-top), 8px); left: 50%;
+      transform: translateX(-50%) translateY(-60px);
+      background: var(--teal);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 999px;
+      font-weight: 800;
+      font-size: 14px;
+      letter-spacing: .02em;
+      box-shadow: 0 8px 24px rgba(13, 115, 119, .35);
+      pointer-events: none;
+      transition: transform .35s cubic-bezier(.34, 1.56, .64, 1), opacity .3s;
+      opacity: 0;
+      z-index: 90;
+    }
+    .combo-pill.shown {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+    .combo-pill.bump { animation: combo-bump .45s ease-out; }
+    @keyframes combo-bump {
+      0%   { transform: translateX(-50%) translateY(0) scale(1); }
+      40%  { transform: translateX(-50%) translateY(0) scale(1.18); }
+      100% { transform: translateX(-50%) translateY(0) scale(1); }
+    }
   </style>
 </head>
 <body>
@@ -897,6 +950,7 @@
 
     <!-- REVIEW -->
     <section id="screen-review" class="screen">
+      <div class="combo-pill" id="combo-pill">🔥 <span id="combo-num">0</span> in Folge</div>
       <div class="review-top">
         <button class="icon-btn" id="btn-quit" aria-label="Schliessen">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
@@ -913,6 +967,9 @@
               <span class="dot" style="background:var(--b1)"></span>
               <span>Fach 1</span>
             </div>
+            <button class="speaker-btn" id="speaker-front" aria-label="Aussprache" style="display:none">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3a4.5 4.5 0 0 0-2.5-4.03v8.05A4.5 4.5 0 0 0 16.5 12zM14 3.23v2.06a7 7 0 0 1 0 13.42v2.06a9 9 0 0 0 0-17.54z"/></svg>
+            </button>
             <div class="term" id="card-term">—</div>
             <div class="flip-hint">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
@@ -925,6 +982,9 @@
               <span class="dot" style="background:var(--b1)"></span>
               <span>Fach 1</span>
             </div>
+            <button class="speaker-btn" id="speaker-back" aria-label="Aussprache" style="display:none">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3a4.5 4.5 0 0 0-2.5-4.03v8.05A4.5 4.5 0 0 0 16.5 12zM14 3.23v2.06a7 7 0 0 1 0 13.42v2.06a9 9 0 0 0 0-17.54z"/></svg>
+            </button>
             <div class="term-back" id="card-term-back">—</div>
             <div class="definition" id="card-def">—</div>
           </div>
@@ -1472,6 +1532,8 @@
     if (!session.length) return;
     sessionIdx = 0;
     sessionResults = { easy: 0, mid: 0, hard: 0, xpStart: state.stats.xp || 0, levelStart: levelForXp(state.stats.xp || 0) };
+    comboCount = 0;
+    if (comboPill) comboPill.classList.remove("shown", "bump");
     showScreen("review");
     renderCard();
   }
@@ -1538,7 +1600,61 @@
     const total = session.length;
     document.getElementById("r-counter").textContent = (sessionIdx + 1) + " / " + total;
     document.getElementById("r-progress").style.width = (sessionIdx / total * 100) + "%";
+
+    // TTS speakers: visible on whichever side shows the Latin term
+    const speakerFront = document.getElementById("speaker-front");
+    const speakerBack  = document.getElementById("speaker-back");
+    if (currentDirection === "la-de") {
+      speakerFront.style.display = "grid";
+      speakerBack.style.display  = "none";
+    } else {
+      speakerFront.style.display = "none";
+      speakerBack.style.display  = "grid";
+    }
   }
+
+  // ---- TTS (Aussprache der Latein-/Fachbegriffe) ----
+  // Pflege-Latein wird in deutschen Schulen i. d. R. eingedeutscht ausgesprochen,
+  // daher als Standard de-DE. Der Browser entscheidet je nach Stimm-Verfügbarkeit.
+  let speakVoice = null;
+  function pickSpeakVoice() {
+    if (!("speechSynthesis" in window)) return null;
+    const voices = window.speechSynthesis.getVoices() || [];
+    return voices.find(v => v.lang === "de-DE")
+        || voices.find(v => v.lang && v.lang.toLowerCase().startsWith("de"))
+        || null;
+  }
+  if ("speechSynthesis" in window) {
+    window.speechSynthesis.onvoiceschanged = () => { speakVoice = pickSpeakVoice(); };
+  }
+  function speakTerm(text, btn) {
+    if (!("speechSynthesis" in window) || !text) return;
+    try {
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      if (!speakVoice) speakVoice = pickSpeakVoice();
+      if (speakVoice) u.voice = speakVoice;
+      u.lang = "de-DE";
+      u.rate = 0.92;
+      u.pitch = 1.0;
+      u.onstart = () => { if (btn) btn.classList.add("playing"); };
+      u.onend   = () => { if (btn) btn.classList.remove("playing"); };
+      u.onerror = () => { if (btn) btn.classList.remove("playing"); };
+      window.speechSynthesis.speak(u);
+    } catch (e) {}
+  }
+  document.getElementById("speaker-front").addEventListener("click", (e) => {
+    e.stopPropagation();
+    if (!session) return;
+    const [term] = session[sessionIdx];
+    speakTerm(term, e.currentTarget);
+  });
+  document.getElementById("speaker-back").addEventListener("click", (e) => {
+    e.stopPropagation();
+    if (!session) return;
+    const [term] = session[sessionIdx];
+    speakTerm(term, e.currentTarget);
+  });
 
   function flipCard() {
     if (currentFlipped) return;
@@ -1549,6 +1665,27 @@
     sfx.flip();
   }
 
+  // ---- Combo counter ----
+  let comboCount = 0;
+  const comboPill = document.getElementById("combo-pill");
+  const comboNum  = document.getElementById("combo-num");
+  function bumpCombo(rating) {
+    if (rating === 2) {
+      comboCount++;
+      if (comboCount >= 3) {
+        comboNum.textContent = comboCount;
+        comboPill.classList.remove("bump"); void comboPill.offsetWidth;
+        comboPill.classList.add("shown", "bump");
+        if (comboCount === 5 || comboCount === 10 || comboCount % 10 === 0) {
+          try { navigator.vibrate && navigator.vibrate([20, 40, 20]); } catch (e) {}
+        }
+      }
+    } else {
+      comboCount = 0;
+      comboPill.classList.remove("shown", "bump");
+    }
+  }
+
   function handleRate(rating) {
     if (!canRate) return;
     const [term] = session[sessionIdx];
@@ -1557,6 +1694,10 @@
     if (rating === 2) { sessionResults.easy++; sfx.easy(); showFloatingXp("+1 XP"); }
     else if (rating === 1) { sessionResults.mid++; sfx.mid(); }
     else { sessionResults.hard++; sfx.hard(); }
+
+    // Combo + Haptik
+    bumpCombo(rating);
+    try { navigator.vibrate && navigator.vibrate(rating === 0 ? 35 : 15); } catch (e) {}
 
     saveState();
 
@@ -1573,6 +1714,8 @@
   }
 
   function quitSession() {
+    try { window.speechSynthesis && window.speechSynthesis.cancel(); } catch (e) {}
+    if (comboPill) comboPill.classList.remove("shown", "bump");
     if (sessionIdx === 0) {
       showScreen("home");
       renderHome();
@@ -1586,6 +1729,8 @@
       updateStreakOnSession();
       saveState();
     }
+    if (comboPill) comboPill.classList.remove("shown", "bump");
+    try { window.speechSynthesis && window.speechSynthesis.cancel(); } catch (e) {}
 
     // Done screen
     const total = sessionResults.easy + sessionResults.mid + sessionResults.hard;
