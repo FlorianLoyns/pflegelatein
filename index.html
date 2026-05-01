@@ -162,6 +162,47 @@
     #screen-home.active { gap: 12px; }
     #screen-home .footer { margin-top: 0; }
 
+    /* ---------- Daily goal (slim bar) ---------- */
+    .goal-slim {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 8px 12px 10px;
+      display: flex; flex-direction: column;
+      gap: 5px;
+    }
+    .goal-slim-row {
+      display: flex; justify-content: space-between; align-items: baseline;
+    }
+    .goal-slim-label {
+      font-size: 11px; color: var(--muted);
+      text-transform: uppercase; letter-spacing: .05em;
+      font-weight: 600;
+    }
+    .goal-slim-progress {
+      font-size: 13px; font-weight: 700; color: var(--ink);
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -.01em;
+    }
+    .goal-slim-bar {
+      height: 4px;
+      background: var(--border);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .goal-slim-fill {
+      height: 100%;
+      width: 0;
+      background: linear-gradient(90deg, var(--gold), #ca9b06, var(--gold));
+      border-radius: 999px;
+      transition: width .5s cubic-bezier(.4,.2,.2,1);
+    }
+    .goal-slim.complete .goal-slim-progress {
+      background: linear-gradient(135deg, var(--gold), #ca9b06);
+      -webkit-background-clip: text; background-clip: text;
+      color: transparent;
+    }
+
     /* ---------- HOME ---------- */
     .topbar {
       display: flex;
@@ -965,6 +1006,14 @@
         </div>
       </div>
 
+      <div class="goal-slim" id="goal-card">
+        <div class="goal-slim-row">
+          <span class="goal-slim-label">Tagesziel</span>
+          <span class="goal-slim-progress" id="goal-progress">0 / 20</span>
+        </div>
+        <div class="goal-slim-bar"><div class="goal-slim-fill" id="goal-fill"></div></div>
+      </div>
+
       <div class="heat-card" id="heat-card">
         <div class="heat-title">
           <span>Letzte 30 Tage</span>
@@ -1564,6 +1613,20 @@
 
     // Heatmap der letzten 30 Tage
     renderHeatmap();
+    renderGoal();
+  }
+
+  // ---- Daily goal (slim bar) ----
+  function renderGoal() {
+    const goal = state.settings.dailyLimit || 20;
+    const today = (state.stats && state.stats.history && state.stats.history[todayKey()]) || 0;
+    const progress = Math.min(today / goal, 1);
+    const fill = document.getElementById("goal-fill");
+    const txt  = document.getElementById("goal-progress");
+    const card = document.getElementById("goal-card");
+    if (fill) fill.style.width = (progress * 100) + "%";
+    if (txt)  txt.textContent = today + " / " + goal;
+    if (card) card.classList.toggle("complete", today >= goal);
   }
 
   // ---- Session state ----
