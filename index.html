@@ -894,6 +894,53 @@
     }
     .sheet-link-row a:hover { text-decoration: underline; }
 
+    /* ---------- Swipe-Overlay auf der Karte ---------- */
+    .swipe-indicator {
+      position: absolute; inset: 0;
+      border-radius: 22px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity .1s;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 28px; font-weight: 800; letter-spacing: -.02em;
+      z-index: 10;
+    }
+    .swipe-indicator.left  { background: rgba(220,38,38,.15); color: #dc2626; }
+    .swipe-indicator.right { background: rgba(34,197,94,.15);  color: #16a34a; }
+
+    /* ---------- Custom Confirm Dialog ---------- */
+    .dialog-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.45);
+      display: flex; align-items: flex-end; justify-content: center;
+      z-index: 999;
+      padding: 0 12px max(24px, env(safe-area-inset-bottom));
+      opacity: 0; pointer-events: none;
+      transition: opacity .2s;
+    }
+    .dialog-overlay.open { opacity: 1; pointer-events: all; }
+    .dialog-box {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 20px;
+      width: 100%; max-width: 420px;
+      transform: translateY(20px);
+      transition: transform .2s;
+    }
+    .dialog-overlay.open .dialog-box { transform: translateY(0); }
+    .dialog-title { font-size: 16px; font-weight: 700; color: var(--ink); margin: 0 0 6px; }
+    .dialog-msg   { font-size: 14px; color: var(--body); line-height: 1.5; margin: 0 0 18px; }
+    .dialog-btns  { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .dialog-btn {
+      padding: 12px; border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--bg2); color: var(--body);
+      font-size: 15px; font-weight: 600; cursor: pointer;
+    }
+    .dialog-btn.danger { background: #dc2626; border-color: #dc2626; color: white; }
+    .dialog-btn:active { opacity: .8; }
+
     /* ---------- TTS Speaker button on cards ---------- */
     .speaker-btn {
       position: absolute; bottom: 16px; right: 16px;
@@ -961,9 +1008,15 @@
             <div class="brand-sub" id="brand-sub-text">Latein → Deutsch</div>
           </div>
         </div>
-        <button class="icon-btn" id="btn-settings" aria-label="Einstellungen">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-        </button>
+        <div style="display:flex; gap:8px; align-items:center;">
+          <button class="icon-btn" id="btn-settings" aria-label="Einstellungen">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          </button>
+          <button class="icon-btn" id="btn-theme" aria-label="Farbschema umschalten">
+            <svg id="theme-icon-sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+            <svg id="theme-icon-moon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          </button>
+        </div>
       </div>
 
       <div class="level-card">
@@ -1057,6 +1110,8 @@
 
       <div class="card-stage">
         <div class="flashcard" id="card">
+          <div class="swipe-indicator left"  id="swipe-left">✕ Wusste nicht</div>
+          <div class="swipe-indicator right" id="swipe-right">✓ Wusste ich</div>
           <div class="face front">
             <div class="card-meta-top" id="card-front-label">Latein</div>
             <div class="card-meta-right" id="card-box-front">
@@ -1214,6 +1269,18 @@
     </div>
   </div>
 
+  <!-- Custom Confirm Dialog -->
+  <div class="dialog-overlay" id="dialog-overlay">
+    <div class="dialog-box">
+      <p class="dialog-title">Fortschritt löschen?</p>
+      <p class="dialog-msg">Alle Lernfortschritte, XP und Fach-Einstufungen werden dauerhaft gelöscht.</p>
+      <div class="dialog-btns">
+        <button class="dialog-btn" id="dialog-cancel">Abbrechen</button>
+        <button class="dialog-btn danger" id="dialog-confirm">Löschen</button>
+      </div>
+    </div>
+  </div>
+
   <script>
   /* ============================================================
      PFLEGELATEIN — Vanilla JS, single file PWA
@@ -1291,6 +1358,16 @@
       const isDark = theme === "dark" ||
         (theme === "system" && window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches);
       meta.setAttribute("content", isDark ? "#0a1414" : "#0d7377");
+    }
+
+    // Sync header icon: show moon in light mode, sun in dark mode
+    const isDarkNow = theme === "dark" ||
+      (theme === "system" && window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches);
+    const sunIcon = document.getElementById("theme-icon-sun");
+    const moonIcon = document.getElementById("theme-icon-moon");
+    if (sunIcon && moonIcon) {
+      sunIcon.style.display = isDarkNow ? "block" : "none";
+      moonIcon.style.display = isDarkNow ? "none" : "block";
     }
   }
   function saveState() {
@@ -1942,6 +2019,21 @@
   document.getElementById("btn-settings").addEventListener("click", openSettings);
   document.getElementById("sheet-bg").addEventListener("click", closeSettings);
 
+  // Header theme toggle: simple dark/light toggle
+  document.getElementById("btn-theme").addEventListener("click", () => {
+    const root = document.documentElement;
+    const isDark = root.classList.contains("dark") ||
+      (!root.classList.contains("light") && window.matchMedia("(prefers-color-scheme: dark)").matches);
+    const next = isDark ? "light" : "dark";
+    state.settings.theme = next;
+    applyTheme(next);
+    saveState();
+    // Sync chip buttons in settings if visible
+    document.querySelectorAll('#chip-theme .chip').forEach(c => {
+      c.classList.toggle("active", c.dataset.theme === next);
+    });
+  });
+
   document.getElementById("card").addEventListener("click", flipCard);
   document.querySelectorAll(".rate-btn").forEach(b => {
     b.addEventListener("click", () => handleRate(parseInt(b.dataset.rating)));
@@ -2010,13 +2102,57 @@
     });
   }
   document.getElementById("btn-reset").addEventListener("click", () => {
-    if (confirm("Wirklich allen Lernfortschritt löschen?")) {
-      state = defaultState();
-      saveState();
-      closeSettings();
-      renderHome();
-    }
+    document.getElementById("dialog-overlay").classList.add("open");
   });
+  document.getElementById("dialog-cancel").addEventListener("click", () => {
+    document.getElementById("dialog-overlay").classList.remove("open");
+  });
+  document.getElementById("dialog-overlay").addEventListener("click", e => {
+    if (e.target === document.getElementById("dialog-overlay"))
+      document.getElementById("dialog-overlay").classList.remove("open");
+  });
+  document.getElementById("dialog-confirm").addEventListener("click", () => {
+    document.getElementById("dialog-overlay").classList.remove("open");
+    state = defaultState();
+    saveState();
+    closeSettings();
+    renderHome();
+  });
+
+  // ---- Swipe auf der Lernkarte ----
+  (function() {
+    const cardEl = document.getElementById("card");
+    let tx = 0, ty = 0, swiping = false;
+
+    cardEl.addEventListener("touchstart", e => {
+      tx = e.touches[0].clientX;
+      ty = e.touches[0].clientY;
+      swiping = true;
+    }, { passive: true });
+
+    cardEl.addEventListener("touchmove", e => {
+      if (!swiping || !currentFlipped) return;
+      const dx = e.touches[0].clientX - tx;
+      const dy = e.touches[0].clientY - ty;
+      if (Math.abs(dy) > Math.abs(dx)) return;
+      const pct = Math.min(Math.abs(dx) / 80, 1);
+      document.getElementById("swipe-left").style.opacity  = dx < -20 ? pct : 0;
+      document.getElementById("swipe-right").style.opacity = dx >  20 ? pct : 0;
+    }, { passive: true });
+
+    cardEl.addEventListener("touchend", e => {
+      if (!swiping) return;
+      swiping = false;
+      document.getElementById("swipe-left").style.opacity  = 0;
+      document.getElementById("swipe-right").style.opacity = 0;
+      if (!currentFlipped || !canRate) return;
+      const dx = e.changedTouches[0].clientX - tx;
+      const dy = e.changedTouches[0].clientY - ty;
+      if (Math.abs(dx) < 60 || Math.abs(dy) > Math.abs(dx) * 0.7) return;
+      if (dx < 0) handleRate(0);   // links = Wusste nicht
+      else        handleRate(2);   // rechts = Wusste ich
+    }, { passive: true });
+  })();
 
   // Service worker
   if ("serviceWorker" in navigator) {
