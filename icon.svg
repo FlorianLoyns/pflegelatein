@@ -10,25 +10,17 @@
     </radialGradient>
   </defs>
 
-  <!-- Teal background tile -->
   <rect width="512" height="512" rx="96" fill="url(#bg)"/>
   <rect width="512" height="512" rx="96" fill="url(#glow)"/>
 
-  <!-- Heart, smaller and lifted up -->
-  <path d="M 256 148
-           C 238 124, 208 98, 175 98
-           C 130 98, 118 150, 132 197
-           C 145 244, 198 294, 256 342
-           C 314 294, 367 244, 380 197
-           C 394 153, 380 104, 336 104
-           C 302 104, 274 124, 256 148 Z"
-        fill="rgba(251, 249, 243, 0.06)"
-        stroke="#fbf9f3" stroke-width="9"
+  <path d="M 256 178
+           C 238 152, 205 124, 170 124
+           C 122 124, 108 180, 123 230
+           C 138 280, 196 335, 256 385
+           C 316 335, 374 280, 389 230
+           C 404 182, 388 128, 342 128
+           C 307 128, 274 152, 256 178 Z"
+        fill="rgba(251,249,243,0.08)"
+        stroke="#fbf9f3" stroke-width="22"
         stroke-linejoin="round" stroke-linecap="round"/>
-
-  <!-- Cor — Latin label below the heart -->
-  <text x="256" y="425" text-anchor="middle"
-        font-family="Georgia, 'Times New Roman', serif"
-        font-size="62" font-style="italic" font-weight="500"
-        fill="#fbf9f3" opacity="0.92" letter-spacing="6">Cor</text>
 </svg>
