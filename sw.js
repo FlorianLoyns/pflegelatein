@@ -1,5 +1,5 @@
 // Service Worker für Offline-Nutzung
-const CACHE = "pflegelatein-v18";
+const CACHE = "pflegelatein-v19";
 const FILES = [
   "./",
   "index.html",
